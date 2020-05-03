@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1053753768757",
+    "firebase_url": "https://ninjasmoothies-9999.firebaseio.com",
+    "project_id": "ninjasmoothies-9999",
+    "storage_bucket": "ninjasmoothies-9999.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053753768757:android:06369ab242ca8f3445ea7c",
+        "android_client_info": {
+          "package_name": "com.example.bloodbank"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053753768757-p54pm85rrrphd3n9fa5osco8iebqa3ip.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bloodbank",
+            "certificate_hash": "b2f24456b1ca40243747d80ce74bcd571f0f0e94"
+          }
+        },
+        {
+          "client_id": "1053753768757-3tu8gdsjf8qmhjgccjcjib27ilhhdnoh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGC8SNxudF-ZxYDXkoPItSgiS2XFiqOUw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053753768757-3tu8gdsjf8qmhjgccjcjib27ilhhdnoh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nearbydon"
+        android:icon="@drawable/ic_people_nearby_24dp"
+        android:title="Near By Donors" />
+    <item
+        android:id="@+id/requestdon"
+        android:icon="@drawable/ic_invert_colors_black_24dp"
+        android:title="Request blood" />
+    <item
+        android:id="@+id/logout"
+        android:title="Log Out" />
+</menu>

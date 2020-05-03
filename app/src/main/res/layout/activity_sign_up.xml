@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgrdpink"
+    tools:context="com.example.bloodbank.SignUp"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp">
+        <TextView
+            android:layout_width="120dp"
+            android:layout_height="30dp"
+            android:background="@drawable/shapelogin_red"
+            android:text="Account"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            android:textAlignment="center"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:scaleType="fitXY"
+        android:src="@mipmap/profile"
+
+        android:id="@+id/profile_pic"
+        android:contentDescription="TODO" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="upload dp"
+        android:id="@+id/uploadb"
+
+        android:background="@drawable/shapelogin_red"
+        android:textColor="@color/White"
+        />
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:weightSum="2">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="Name: "
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_weight=".1"/>
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.8"
+
+                    android:id="@+id/name"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:weightSum="2">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="Blood type : "
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_weight=".1"/>
+                <Spinner
+                    android:id="@+id/spinnerbtype"
+                    android:layout_width="250dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="5dp"
+                android:weightSum="2">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="Gender :        "
+                    android:textSize="16dp"
+                    android:textStyle="bold"
+                    android:layout_weight=".1"/>
+                <Spinner
+                    android:id="@+id/spinner_gender"
+                    android:layout_width="250dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+
+                    tools:ignore="HardcodedText" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="5dp"
+                android:weightSum="2">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="Address : "
+                    android:textStyle="bold"
+                    android:textSize="16dp"
+                    android:layout_weight=".05"
+                    android:layout_marginRight="8dp"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16dp"
+                    android:id="@+id/address"
+                    android:layout_weight="1.8"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="5dp"
+                android:weightSum="2">
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="Email : "
+                    android:textStyle="bold"
+                    android:textSize="16dp"
+                    android:layout_weight=".05"
+                    android:layout_marginRight="8dp"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16dp"
+                    android:id="@+id/email"
+                    android:layout_weight="1.8"/>
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="5dp"
+                android:weightSum="2">
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="Password : "
+                    android:textStyle="bold"
+                    android:textSize="16dp"
+                    android:layout_weight=".05"
+                    android:layout_marginRight="8dp"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16dp"
+                    android:id="@+id/password"
+                    android:inputType="textPassword"
+                    android:layout_weight="1.8"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="5dp"
+                android:weightSum="2">
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="Phone : "
+                    android:textStyle="bold"
+                    android:textSize="16dp"
+                    android:layout_weight=".05"
+                    android:layout_marginRight="8dp"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16dp"
+                    android:id="@+id/phone"
+                    android:inputType="number"
+                    android:layout_weight="1.8"/>
+
+            </LinearLayout>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="@drawable/shapelogin_red"
+                android:layout_marginRight="15dp"
+                android:layout_marginLeft="15dp"
+                android:text="Sign Up"
+                android:textColor="#fff"
+                android:id="@+id/submit"
+
+                android:layout_marginTop="40dp"
+                android:layout_marginBottom="10dp"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
+

@@ -1,24 +1,41 @@
 package com.example.bloodbank;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.gms.location.*;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static com.example.bloodbank.MainActivity.db;
 import static com.example.bloodbank.MainActivity.mAuth;
@@ -30,49 +47,96 @@ public class MainFragment extends Fragment implements DonorAdapter.onSingleDonor
     private RecyclerView recyclerView;
     DonorAdapter donorAdapter;
     Spinner spinnerbtype;
+    FusedLocationProviderClient mFusedLocationClient;
+    double latitude,longitude;
     ArrayAdapter<String> adapter1;
-    String id;
-    final ArrayList<ZMyDatabaseDataStructure> donorlist= new ArrayList<>();
+    String id= Objects.requireNonNull(mAuth.getCurrentUser()).getUid();;
+    ArrayList<ZMyDatabaseDataStructure> donorlist= new ArrayList<>();
+    int PERMISSION_ID = 45;
+
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable Bundle savedInstanceState) {
 //        return super.onCreateView(inflater, container, savedInstanceState);
         view = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView=view.findViewById(R.id.recyclerView);
         spinnerbtype = view.findViewById(R.id.spinnerbtypefrag);
         String[] group = new String[]{"O+", "O-", "A+", "B+", "A-", "B-", "AB+", "AB-"};
-        adapter1 = new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_dropdown_item, group);
+        adapter1 = new ArrayAdapter<>(Objects.requireNonNull(this.getActivity()), android.R.layout.simple_spinner_dropdown_item, group);
         spinnerbtype.setAdapter(adapter1);
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
+        getLastLocation();
+
+
+
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-        db.collection("users").get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+       CollectionReference colref= db.collection("users");
+
+        colref
+//                .whereLessThan("latitude",String.valueOf(latitude+0.5))
+//                .whereGreaterThan("latitude", String.valueOf(latitude-0.5))
+                .get()
+
+        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                       Log.d("size", String.valueOf(queryDocumentSnapshots.size()));
-//                        String name2,bgroup2;
-                          for(DocumentSnapshot documentSnapshot:queryDocumentSnapshots) {
-//                            name2 =documentSnapshot.getString("name");
-//                                    bgroup2 =documentSnapshot.getString("bgroup");
-
-//                              Picasso.with(activity).load(documentSnapshot.getString("imgloc")).transform(new CircleTransform()).into(pro);
-//                              id=documentSnapshot.getId();
-                              Log.d("id", documentSnapshot.getId());
-                              Log.d("iduser", mAuth.getCurrentUser().getUid());
-
-                              if(!documentSnapshot.getId().equals(mAuth.getCurrentUser().getUid())) {
-                                  ZMyDatabaseDataStructure z = documentSnapshot.toObject(ZMyDatabaseDataStructure.class);
+          public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
 
-                            donorlist.add(z);}
+          Log.d("size", String.valueOf(queryDocumentSnapshots.size()));
+          if (queryDocumentSnapshots.size() == 0) {
+
+              AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+              builder.setMessage("no donors found")
+                      .setTitle("sorry");
+
+              AlertDialog dialog = builder.create();
+          } else {
+              for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+
+                  Log.d("id", documentSnapshot.getId());
+                  Log.d("iduser", id);
+
+                  double dist= 4d;
+                  if (!(id.equals(documentSnapshot.getId()))) {
+                    try{ dist = distance(latitude,
+                            longitude,
+                            documentSnapshot.getGeoPoint("location"));}catch (NullPointerException e){ Log.d("iduser", id);}
+                      if (dist < 50000) {
+
+
+                          ZMyDatabaseDataStructure z = documentSnapshot.toObject(ZMyDatabaseDataStructure.class);
+                          if(dist>1000){
+                              dist/=1000;
+                              dist= (int)(dist*100)/(double)100;
+                              z.setDistance(dist+"km");
+                          }else {
+
+                              z.setDistance((int)dist + "m");
 
                           }
-                        donorAdapter = new DonorAdapter(donorlist,MainFragment.this);
-                        recyclerView.setAdapter(donorAdapter);
-                    }
-                })
+                          donorlist.add(z);
+
+                      }
+                  }
+
+              }
+//              donorlist.sort(new Comparator<ZMyDatabaseDataStructure>() {
+//                  @Override
+//                  public int compare(ZMyDatabaseDataStructure o1, ZMyDatabaseDataStructure o2) {
+//                      return o1.distance.compareTo(o2.distance);
+//                  }
+//              });
+              donorAdapter = new DonorAdapter(donorlist, MainFragment.this);
+              recyclerView.setAdapter(donorAdapter);
+          }
+      }
+        })
+
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
@@ -80,7 +144,6 @@ public class MainFragment extends Fragment implements DonorAdapter.onSingleDonor
                     }
                 });
 
-//      displayDonors(view);
         return view;
     }
 
@@ -95,120 +158,113 @@ i.putExtra("name",donorAdapter.donorlist.get(position).name);
         i.putExtra("gender",donorAdapter.donorlist.get(position).gender);
         i.putExtra("imgloc",donorAdapter.donorlist.get(position).imgloc);
         i.putExtra("address",donorAdapter.donorlist.get(position).address);
+        i.putExtra("phone",donorAdapter.donorlist.get(position).phone);
         startActivity(i);
     }
+     boolean checkPermissions() {
+         return ActivityCompat.checkSelfPermission(Objects.requireNonNull(this.getActivity()), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                 ActivityCompat.checkSelfPermission(this.getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+     }
 
-
-
-//    public void displayDonors(View view) {
-//
-////        ButterKnife.bind(this);
-//        String id = "9DBet2djXGWdkTuvEKy14JOG2Y63";
-////        Query lessQuery = db.collection("users").whereLessThan("uid", id);
-////        Query greaterQuery = db.collection("users").whereGreaterThan("uid", id);
-////        Task lessQuerytask  = lessQuery.get();
-//        Query query = FirebaseFirestore.getInstance()
-//                .collection("users");
-////        Task<com.google.firebase.firestore.QuerySnapshot> greaterQuerytask = greaterQuery.get();
-//        FirestoreRecyclerOptions<ZMyDatabaseDataStructure> options = new FirestoreRecyclerOptions.Builder<ZMyDatabaseDataStructure>()
-//                .setQuery(query,ZMyDatabaseDataStructure.class)
-//                .build();
-////        donorAdapter = new DonorAdapter(options);
-//
-//        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
-//        recyclerView.setHasFixedSize(true);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity();
-//        recyclerView.setAdapter(donorAdapter);
-//        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
-//                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-//            @Override
-//            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-//                return false;
-//            }
-//
-//            @Override
-//            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-//                donorAdapter.deleteItem(viewHolder.getAdapterPosition());
-//            }
-//        }).attachToRecyclerView(recyclerView);
-//
-//        donorAdapter.setOnItemClickListener(new DonorAdapter.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(DocumentSnapshot documentSnapshot, int position) {
-//                ZMyDatabaseDataStructure note = documentSnapshot.toObject(ZMyDatabaseDataStructure.class);
-//                String id = documentSnapshot.getId();
-//                String path = documentSnapshot.getReference().getPath();
-//                Toast.makeText(getActivity(),
-//                        "Position: " + position + " ID: " + id, Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//    }
-//}
-//class DonorHolder extends RecyclerView.ViewHolder {
-//    TextView name;
-//    TextView bgroup;
-////    Button viewDetails,callperson;
-//
-//    public DonorHolder(View itemView) {
-//        super(itemView);
-//        name = itemView.findViewById(R.id.name);
-//        bgroup = itemView.findViewById(R.id.bgroup);
-//        viewDetails = itemView.findViewById(R.id.viewprfile);
-//        callperson=itemView.findViewById(R.id.call);
-//        callperson.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                int position = getAdapterPosition();
-//                if (position != RecyclerView.NO_POSITION && listener != null) {
-//                    listener.onItemClick(getSnapshots().getSnapshot(position), position);
-//                }
-//
-//            }
-//        });
-//
-//        viewDetails.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                int position = getAdapterPosition();
-//                if (position != RecyclerView.NO_POSITION && listener != null) {
-//                    listener.onItemClick(getSnapshots().getSnapshot(position), position);
-//                }
-//            }
-//        });
-
-//    public class CircleTransform implements Transformation {
-//        @Override
-//        public Bitmap transform(Bitmap source) {
-//            int size = Math.min(source.getWidth(), source.getHeight());
-//
-//            int x = (source.getWidth() - size) / 2;
-//            int y = (source.getHeight() - size) / 2;
-//
-//            Bitmap squaredBitmap = Bitmap.createBitmap(source, x, y, size, size);
-//            if (squaredBitmap != source) {
-//                source.recycle();
-//            }
-//
-//            Bitmap bitmap = Bitmap.createBitmap(size, size, source.getConfig());
-//
-//            Canvas canvas = new Canvas(bitmap);
-//            Paint paint = new Paint();
-//            BitmapShader shader = new BitmapShader(squaredBitmap,
-//                    Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-//            paint.setShader(shader);
-//            paint.setAntiAlias(true);
-//
-//            float r = size / 2f;
-//            canvas.drawCircle(r, r, r, paint);
-//
-//            squaredBitmap.recycle();
-//            return bitmap;
-//        }
-//
-//        @Override
-//        public String key() {
-//            return "circle";
-//        }
-//    }
+     void requestPermissions() {
+        ActivityCompat.requestPermissions(
+                Objects.requireNonNull(this.getActivity()),
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                PERMISSION_ID
+        );
     }
-//
+
+     boolean isLocationEnabled() {
+        LocationManager locationManager = (LocationManager) Objects.requireNonNull(getActivity()).getSystemService(Context.LOCATION_SERVICE);
+         assert locationManager != null;
+         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+                LocationManager.NETWORK_PROVIDER
+        );
+    }
+
+    @SuppressLint("MissingPermission")
+     void getLastLocation(){
+        if (checkPermissions()) {
+            if (isLocationEnabled()) {
+                mFusedLocationClient.getLastLocation().addOnCompleteListener(
+                        new OnCompleteListener<Location>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Location> task) {
+                                Location location = task.getResult();
+                                if (location == null) {
+                                    requestNewLocationData();
+                                } else {
+                                    latitude = location.getLatitude();
+                                    longitude= location.getLongitude();
+
+                                    Log.d("lat",latitude+"");
+                                    Log.d("long",longitude+"");
+
+                                }
+                            }
+                        }
+                );
+            } else {
+                Toast.makeText(MainFragment.this.getActivity(),"enable location",Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        } else {
+            requestPermissions();
+        }
+    }
+    @SuppressLint("MissingPermission")
+     void requestNewLocationData(){
+
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(0);
+        mLocationRequest.setFastestInterval(0);
+        mLocationRequest.setNumUpdates(1);
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(this.getActivity()));
+        mFusedLocationClient.requestLocationUpdates(
+                mLocationRequest, mLocationCallback,
+
+                Looper.myLooper()
+        );
+
+    }
+     LocationCallback mLocationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            Location mLastLocation = locationResult.getLastLocation();
+//            lat
+
+        }
+    };
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_ID) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Granted. Start getting the location information
+            }
+        }
+    }
+    public static double distance(double lat1, double lng1, GeoPoint point){
+        try {
+
+            Location location1 = new Location("locationA");
+            location1.setLatitude(lat1);
+            location1.setLongitude(lng1);
+            Location location2 = new Location("locationB");
+            location2.setLatitude(point.getLatitude());
+            location2.setLongitude(point.getLongitude());
+
+            double dista= location1.distanceTo(location2);
+
+            return dista;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+        return 0;
+    }
+    }

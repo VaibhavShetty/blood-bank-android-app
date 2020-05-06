@@ -4,23 +4,51 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class ZMyDatabaseDataStructure implements Parcelable {
-    String email,address,name,bgroup,imgloc ,gender,phone;
-    String imgurl;
+    String email;
+    String address;
+    String name;
+    String bgroup;
+    String imgloc;
+    String phone;
+
+    String  distance;
+    String gender;
+
+    public String getPhone() {
+        return phone;
+    }
+
+
+    public String getDistance() {
+        return distance;
+    }
+
+
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+
+    public void setDistance(String distance) {
+        this.distance = distance;
+    }
 
     protected ZMyDatabaseDataStructure(Parcel in) {
         name = in.readString();
         bgroup = in.readString();
         imgloc = in.readString();
+        gender = in.readString();
 
     }
     public ZMyDatabaseDataStructure(){}
 
 
 
-    public ZMyDatabaseDataStructure(String name, String bgroup, String imgurl) {
+    public ZMyDatabaseDataStructure(String name, String bgroup, String imgloc) {
         this.name = name;
         this.bgroup = bgroup;
-        this.imgurl=imgurl;
+        this.imgloc=imgloc;
     }
 
     public ZMyDatabaseDataStructure(String email, String address, String name, String bgroup, String imgloc, String gender,String phone) {
@@ -67,7 +95,7 @@ public class ZMyDatabaseDataStructure implements Parcelable {
     }
 
     public String getGender() {
-        return gender;
+        return this.gender;
     }
 
     public void setGender(String gender) {
@@ -109,5 +137,6 @@ public class ZMyDatabaseDataStructure implements Parcelable {
         parcel.writeString(name);
         parcel.writeString(bgroup);
         parcel.writeString(imgloc);
+        parcel.writeString(gender);
     }
 }

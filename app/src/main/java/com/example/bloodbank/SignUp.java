@@ -1,22 +1,18 @@
 package com.example.bloodbank;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.Toast;
-
+import android.widget.*;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -36,16 +32,14 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.PermissionRequestErrorListener;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
-
 import static com.example.bloodbank.MainActivity.db;
 
-public class SignUp extends Activity {
+public class SignUp extends AppCompatActivity {
     ImageView propic;
     Button submit;
     Uri filePath;
@@ -150,24 +144,34 @@ public class SignUp extends Activity {
     }
 
     private void chooseImage() {
-        Intent intent = new Intent();
+//        Intent intent =new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+//
+//        startActivityForResult(intent,100);
+      Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), 71);
+        startActivityForResult(intent, 100);
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 71 && resultCode == RESULT_OK
-                && data != null && data.getData() != null )
+        if(requestCode == 100
+                )
         {
-            filePath = data.getData();
             try {
+//                propic=findViewById(R.id.profile_pic);
+//                filePath = data.getData();
+//                propic.setImageURI(filePath);
+            filePath = data.getData();
+
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                InputStream inputStream =this.getContentResolver().openInputStream(data.getData());
+               Bitmap bmp = BitmapFactory.decodeStream(inputStream);
+
                 propic=findViewById(R.id.profile_pic);
-                propic.setImageBitmap(bitmap);
+                propic.setImageBitmap(bmp);
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 e.printStackTrace();
             }
@@ -222,6 +226,12 @@ public class SignUp extends Activity {
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                            while (!uriTask.isComplete());
+                            Uri uriphoto = uriTask.getResult();
+                            urlStorage = uriphoto.toString();
+
+
                             progressDialog.dismiss();
                             Toast.makeText(SignUp.this, "Uploaded", Toast.LENGTH_SHORT).show();
                         }
@@ -263,14 +273,14 @@ public class SignUp extends Activity {
             data.put("bgroup", bg);
             data.put("gender", gen);
             data.put("phone",Phone);
-            storageReference.child("users/" + currentUser.getUid()).getDownloadUrl()
-                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                           urlStorage= uri.toString();
-
-                        }
-                    });
+//            storageReference.child("users/" + currentUser.getUid()).getDownloadUrl()
+//                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                        @Override
+//                        public void onSuccess(Uri uri) {
+//                           urlStorage= uri.toString();
+//
+//                        }
+//                    });
             data.put("imgloc",urlStorage );
             db.collection("users").document(currentUser.getUid()).set(data)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -278,7 +288,9 @@ public class SignUp extends Activity {
                         public void onSuccess(Void aVoid) {
                             Intent i =new Intent(SignUp.this,HomePageActivity.class);
 //                            i.putExtra("userid",currentUser);
+
                             startActivity(i);
+                            finish();
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                 @Override

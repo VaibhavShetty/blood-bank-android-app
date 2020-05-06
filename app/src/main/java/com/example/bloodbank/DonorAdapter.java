@@ -5,14 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.squareup.picasso.Picasso;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import java.util.ArrayList;
 
 public class DonorAdapter extends RecyclerView.Adapter<DonorAdapter.DonorHolder> {
 
@@ -41,6 +39,7 @@ public class DonorAdapter extends RecyclerView.Adapter<DonorAdapter.DonorHolder>
         ZMyDatabaseDataStructure donor = donorlist.get(position);
         holder.name.setText(donor.getName());
         holder.bgroup.setText(donor.getBgroup());
+        holder.distance.setText(String.valueOf(donor.distance));
         Picasso.get().load(donor.getPhoto()).into(holder.img);
     }
 
@@ -51,7 +50,7 @@ public class DonorAdapter extends RecyclerView.Adapter<DonorAdapter.DonorHolder>
 
     public static class DonorHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        TextView name;
+        TextView name,distance;
         TextView bgroup;
         onSingleDonorClickListener listener;
         CircleImageView img;
@@ -59,6 +58,7 @@ public class DonorAdapter extends RecyclerView.Adapter<DonorAdapter.DonorHolder>
             super(itemView);
             name = itemView.findViewById(R.id.name);
             bgroup = itemView.findViewById(R.id.bgroup);
+            distance= itemView.findViewById(R.id.distance);
             img=itemView.findViewById(R.id.profile_img_recycler);
             this.listener = listener;
 //            itemView.findViewById(R.id.call).setOnClickListener(this);

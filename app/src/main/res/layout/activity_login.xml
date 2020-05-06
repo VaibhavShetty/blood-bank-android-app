@@ -65,7 +65,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sign Up"
+        android:text="not a member ?Sign Up"
         android:shadowColor="@android:color/transparent"
         android:padding="15dp"
         android:background="@drawable/shapelogin_red"

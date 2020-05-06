@@ -1,24 +1,29 @@
 package com.example.bloodbank;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import static  com.example.bloodbank.MainActivity.mAuth;
+import static com.example.bloodbank.MainActivity.mAuth;
+import static com.example.bloodbank.MainActivity.sp;
 
 public class LoginActivity extends AppCompatActivity {
 EditText email,pass;
-TextView feedback;
+
+
+
+    TextView feedback;
 Button signup,login;
 FirebaseUser user;
 //Intent i=getIntent();
@@ -27,27 +32,14 @@ FirebaseUser user;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-//        mAuth = FirebaseAuth.getInstance();
 
-//        List<AuthUI.IdpConfig> providers = Arrays.asList(
-//                new AuthUI.IdpConfig.EmailBuilder().build());
-//
-//// Create and launch sign-in intent
-//        startActivityForResult(
-//                AuthUI.getInstance()
-//                        .createSignInIntentBuilder()
-//                        .setAvailableProviders(providers)
-//                        .build(),
-//                123);
+
 
         email=findViewById(R.id.email);
         pass=findViewById(R.id.password);
 
         login=findViewById(R.id.login);
-//        if(i.getStringExtra("status").equals("signup")) {
-//            login.setText("Sign Up");
-//        }else
-//            login.setText("Sign in");
+
 
         feedback=findViewById(R.id.feedback);
         signup=findViewById(R.id.signup);
@@ -56,39 +48,53 @@ FirebaseUser user;
         login.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View v) {
-//                 startActivity(new Intent(LoginActivity.this,HomePageActivity.class));
-                 mAuth.signInWithEmailAndPassword(email.getText().toString(),pass.getText().toString())
-                         .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                             @Override
-                             public void onComplete(@NonNull Task<AuthResult> task) {
-                                 if (task.isSuccessful()) {
-                                     // Sign in: success
-                                     // update UI for current User
-                                     startActivity(new Intent(LoginActivity.this,HomePageActivity.class));
-//                                     FirebaseUser user = mAuth.getCurrentUser();
-//                                     updateUI(user,Email);
-                                 } else {
-                                     // Sign in: fail
-                                                            feedback.setText("invalid user");
-//                                                            updateUI(null);
-                                 }
+                 try {
+                     mAuth.signInWithEmailAndPassword(email.getText().toString(), pass.getText().toString())
+                             .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                                 @Override
+                                 public void onComplete(@NonNull Task<AuthResult> task) {
+                                     if (task.isSuccessful()) {
+                                         ;
+                                         sp.edit().putBoolean("logged", true).apply();
 
-                                 // ...
+                                         startActivity(new Intent(LoginActivity.this, HomePageActivity.class));
+
+                                     } else {
+                                         feedback.setText("invalid user");
+
+                                     }
+
+                                 }
+                             });
+
+                 } catch (Exception e) {
+                     DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                         @Override
+                         public void onClick(DialogInterface dialog, int which) {
+                             switch (which) {
+                                 case DialogInterface.BUTTON_POSITIVE:
+                                     //Yes button clicked
+                                     email.setText("");
+                                     pass.setText("");
+
+                                     break;
+
+
                              }
-                         });
+                         }
+
+                     };
+
+                     AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                     builder.setMessage("Something went wrong please try again").setPositiveButton("OK", dialogClickListener)
+                             .show();
                  }
+             }
 
       });
 
     }
-//    @Override
-//    public void onStart() {
-//        // ...
-//
-//        super.onStart();
-//        FirebaseUser currentUser = mAuth.getCurrentUser();
-//        updateUI(currentUser);
-//    }
+
 
 
     @Override
@@ -97,7 +103,10 @@ FirebaseUser user;
         email.setText("");
         pass.setText("");
     }
-
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
     public void signup(View view) {
         startActivity(new Intent(this,SignUp.class));
     }

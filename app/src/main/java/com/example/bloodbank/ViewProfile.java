@@ -10,9 +10,17 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.GeoPoint;
 import com.squareup.picasso.Picasso;
 
 import androidx.core.app.ActivityCompat;
+
+import static com.example.bloodbank.MainActivity.db;
+import static com.example.bloodbank.MainActivity.mAuth;
 
 public class ViewProfile extends Activity {
     //    String id="sds";
@@ -62,9 +70,37 @@ ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CALL_PHO
             return;
         }
         startActivity(i);
+    }
+    public void viewOnMap(View view){
+
+        db.collection("users").document(mAuth.getCurrentUser().getUid()).get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        // Creates an Intent that will load a map of San Francisco
+                        GeoPoint g = documentSnapshot.getGeoPoint("location");
+                        double myLatitude=g.getLatitude(),myLongitude=g.getLongitude();
+                        String labelLocation=documentSnapshot.getString("name");
+                        assert g != null;
+                        Uri gmmIntentUri = Uri.parse("geo:<" + myLatitude  + ">,<" + myLongitude + ">?q=<" + myLatitude  + ">,<" + myLongitude + ">(" + labelLocation + ")");
+                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                        mapIntent.setPackage("com.google.android.apps.maps");
+                        if (mapIntent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(mapIntent);
+                        }                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
 
 
     }
+
+
 //    public static Bitmap getBitmapFromURL(String src) {
 //        try {
 //            Log.e("src",src);

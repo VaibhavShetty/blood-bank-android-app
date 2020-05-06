@@ -1,50 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/backgrdpink"
-    tools:context="com.example.bloodbank.SignUp"
-    android:orientation="vertical">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/backgrdpink"
+
+
+
+              android:orientation="vertical">
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="65dp">
+            android:layout_width="match_parent"
+            android:layout_height="65dp">
         <TextView
-            android:layout_width="120dp"
-            android:layout_height="30dp"
-            android:background="@drawable/shapelogin_red"
-            android:text="Account"
-            android:textSize="20sp"
-            android:textColor="#fff"
-            android:textAlignment="center"
-            android:textStyle="bold"
-            android:layout_centerVertical="true"
-            android:layout_centerInParent="true"/>
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:background="@drawable/shapelogin_red"
+                android:text="Your profile"
+                android:textSize="20sp"
+                android:textColor="#fff"
+                android:textAlignment="center"
+                android:textStyle="bold"
+                android:layout_centerVertical="true"
+                android:layout_centerInParent="true"/>
     </RelativeLayout>
 
 
     <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:scaleType="fitXY"
-        android:src="@mipmap/profile"
-
-        android:id="@+id/profile_pic"
-        android:contentDescription="TODO" />
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:scaleType="fitXY"
+            android:src="@mipmap/profile"
+android:onClick="chooseImageupdate"
+            android:id="@+id/profile_pic_update"
+            android:contentDescription="TODO" />
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="upload dp"
-        android:id="@+id/uploadb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Change Profile picture"
+            android:id="@+id/uploadb_update"
 
-        android:background="@drawable/shapelogin_red"
-        android:textColor="@color/White"
-        />
+            android:background="@drawable/shapelogin_red"
+            android:textColor="@color/White"
+    />
 
 
     <ScrollView
@@ -76,7 +78,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1.8"
 
-                        android:id="@+id/name"
+                        android:id="@+id/name_update"
                         android:textSize="16sp"/>
             </LinearLayout>
 
@@ -96,7 +98,7 @@
                         android:textSize="16sp"
                         android:layout_weight=".1"/>
                 <Spinner
-                        android:id="@+id/spinnerbtype"
+                        android:id="@+id/spinnerbtype_update"
                         android:layout_width="250dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
@@ -120,7 +122,7 @@
                         android:textStyle="bold"
                         android:layout_weight=".1"/>
                 <Spinner
-                        android:id="@+id/spinner_gender"
+                        android:id="@+id/spinner_gender_update"
                         android:layout_width="250dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
@@ -149,57 +151,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="16dp"
-                        android:id="@+id/address"
+                        android:id="@+id/address_update"
                         android:layout_weight="1.8"/>
-            </LinearLayout>
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginRight="20dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="5dp"
-                    android:weightSum="2">
-                <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:text="Email : "
-                        android:textStyle="bold"
-                        android:textSize="16dp"
-                        android:layout_weight=".05"
-                        android:layout_marginRight="8dp"/>
-                <EditText
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="16dp"
-                        android:id="@+id/email"
-                        android:layout_weight="1.8"/>
-
-            </LinearLayout>
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginRight="20dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="5dp"
-                    android:weightSum="2">
-                <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:text="Password : "
-                        android:textStyle="bold"
-                        android:textSize="16dp"
-                        android:layout_weight=".05"
-                        android:layout_marginRight="8dp"/>
-                <EditText
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="16dp"
-                        android:id="@+id/password"
-                        android:inputType="textPassword"
-                        android:layout_weight="1.8"/>
-
             </LinearLayout>
 
             <LinearLayout
@@ -222,7 +175,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="16dp"
-                        android:id="@+id/phone"
+                        android:id="@+id/phone_update"
                         android:inputType="number"
                         android:layout_weight="1.8"/>
 
@@ -234,16 +187,17 @@
                     android:background="@drawable/shapelogin_red"
                     android:layout_marginRight="15dp"
                     android:layout_marginLeft="15dp"
-                    android:text="Sign Up"
+                    android:text="Update"
+                    android:onClick="updateUserInfo"
                     android:textColor="#fff"
-                    android:id="@+id/submit"
+                    android:id="@+id/update"
 
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="10dp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="16dp"
 
-                      android:id="@+id/feedback"
+                      android:id="@+id/feedback_update"
                       android:layout_gravity="center"
                       android:textStyle="bold"
                       android:textColor="@color/appRed"

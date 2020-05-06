@@ -10,6 +10,9 @@
         android:icon="@drawable/ic_invert_colors_black_24dp"
         android:title="Request blood" />
     <item
+        android:id="@+id/edit_profile"
+        android:title="Edit Profile"/>
+    <item
         android:id="@+id/logout"
         android:title="Log Out" />
 </menu>

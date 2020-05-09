@@ -39,8 +39,13 @@ public class DonorAdapter extends RecyclerView.Adapter<DonorAdapter.DonorHolder>
         ZMyDatabaseDataStructure donor = donorlist.get(position);
         holder.name.setText(donor.getName());
         holder.bgroup.setText(donor.getBgroup());
-        holder.distance.setText(String.valueOf(donor.distance));
+        holder.distance.setText(donor.distance+donor.unit);
+        if(holder.img!=null)
         Picasso.get().load(donor.getPhoto()).into(holder.img);
+        else {
+
+            holder.img.setImageResource(R.mipmap.profile);
+        }
     }
 
     @Override

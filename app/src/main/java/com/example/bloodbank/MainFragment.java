@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -34,8 +35,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
-import java.util.Objects;
+import java.util.*;
 
 import static com.example.bloodbank.MainActivity.db;
 import static com.example.bloodbank.MainActivity.mAuth;
@@ -43,15 +43,17 @@ import static com.example.bloodbank.MainActivity.mAuth;
 
 public class MainFragment extends Fragment implements DonorAdapter.onSingleDonorClickListener {
     private View view;
-//    FirestoreRecyclerAdapter firestoreRecyclerAdapter;
     private RecyclerView recyclerView;
     DonorAdapter donorAdapter;
+
     Spinner spinnerbtype;
     FusedLocationProviderClient mFusedLocationClient;
     double latitude,longitude;
     ArrayAdapter<String> adapter1;
     String id= Objects.requireNonNull(mAuth.getCurrentUser()).getUid();;
     ArrayList<ZMyDatabaseDataStructure> donorlist= new ArrayList<>();
+    ArrayList<ZMyDatabaseDataStructure> donorlist2= new ArrayList<>();
+
     int PERMISSION_ID = 45;
 
 
@@ -62,7 +64,8 @@ public class MainFragment extends Fragment implements DonorAdapter.onSingleDonor
         view = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView=view.findViewById(R.id.recyclerView);
         spinnerbtype = view.findViewById(R.id.spinnerbtypefrag);
-        String[] group = new String[]{"O+", "O-", "A+", "B+", "A-", "B-", "AB+", "AB-"};
+
+        String[] group = new String[]{"all" ,"O+", "O-", "A+", "B+", "A-", "B-", "AB+", "AB-"};
         adapter1 = new ArrayAdapter<>(Objects.requireNonNull(this.getActivity()), android.R.layout.simple_spinner_dropdown_item, group);
         spinnerbtype.setAdapter(adapter1);
 
@@ -76,12 +79,7 @@ public class MainFragment extends Fragment implements DonorAdapter.onSingleDonor
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
        CollectionReference colref= db.collection("users");
 
-        colref
-//                .whereLessThan("latitude",String.valueOf(latitude+0.5))
-//                .whereGreaterThan("latitude", String.valueOf(latitude-0.5))
-                .get()
-
-        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        colref.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
           public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
@@ -95,6 +93,7 @@ public class MainFragment extends Fragment implements DonorAdapter.onSingleDonor
                       .setTitle("sorry");
 
               AlertDialog dialog = builder.create();
+              dialog.show();
           } else {
               for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
 
@@ -113,27 +112,44 @@ public class MainFragment extends Fragment implements DonorAdapter.onSingleDonor
                           if(dist>1000){
                               dist/=1000;
                               dist= (int)(dist*100)/(double)100;
-                              z.setDistance(dist+"km");
+                              z.setDistance(dist);
+                              z.unit="km";
                           }else {
 
-                              z.setDistance((int)dist + "m");
+                              z.setDistance((int)dist);
+                              z.unit="m";
 
                           }
+                          z.setId(documentSnapshot.getId());
+
                           donorlist.add(z);
 
                       }
                   }
 
+
               }
-//              donorlist.sort(new Comparator<ZMyDatabaseDataStructure>() {
-//                  @Override
-//                  public int compare(ZMyDatabaseDataStructure o1, ZMyDatabaseDataStructure o2) {
-//                      return o1.distance.compareTo(o2.distance);
-//                  }
-//              });
+              Collections.sort(donorlist, new Comparator<ZMyDatabaseDataStructure>() {
+                  @Override
+                  public int compare(ZMyDatabaseDataStructure o1, ZMyDatabaseDataStructure o2) {
+                      if(o1.unit.equals("m")&&o2.unit.equals("km"))
+                          return -1;
+                      else if(o2.unit.equals("m")&&o1.unit.equals("km"))
+                          return  1;
+                      else {
+                          if (o1.distance == o2.distance)
+                              return 0;
+                          else if (o1.distance < o2.distance)
+                              return -1;
+                          else
+                              return 1;
+                      }
+                  }
+              });
               donorAdapter = new DonorAdapter(donorlist, MainFragment.this);
               recyclerView.setAdapter(donorAdapter);
           }
+
       }
         })
 
@@ -144,23 +160,71 @@ public class MainFragment extends Fragment implements DonorAdapter.onSingleDonor
                     }
                 });
 
+
+
+        spinnerbtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(position==0){
+                    donorAdapter = new DonorAdapter(donorlist, MainFragment.this);
+                }else {
+                    donorlist2.clear();
+                        donorAdapter=null;
+                    Iterator<ZMyDatabaseDataStructure> iter
+                            = donorlist.iterator();
+                    while(iter.hasNext()) {
+                        ZMyDatabaseDataStructure z=iter.next();
+                        Log.d("position", String.valueOf(position));
+                        if (z.getBgroup().equals(group[position])) {
+
+                            donorlist2.add(z);
+                        }
+                    }
+                    if(donorlist2.isEmpty()){
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                        builder.setMessage("no donors found")
+                                .setTitle("sorry");
+
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                    donorAdapter = new DonorAdapter(donorlist2, MainFragment.this);
+
+                }
+                recyclerView.setAdapter(donorAdapter);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
         return view;
     }
 
     @Override
     public void onDonorClick(int position,View view) {
-Intent i=        new Intent(getActivity(),ViewProfile.class);
 
-i.putExtra("name",donorAdapter.donorlist.get(position).name);
-        i.putExtra("bgroup",donorAdapter.donorlist.get(position).bgroup);
+            Intent i=        new Intent(getActivity(),ViewProfile.class);
 
-        i.putExtra("email",donorAdapter.donorlist.get(position).email);
-        i.putExtra("gender",donorAdapter.donorlist.get(position).gender);
-        i.putExtra("imgloc",donorAdapter.donorlist.get(position).imgloc);
-        i.putExtra("address",donorAdapter.donorlist.get(position).address);
-        i.putExtra("phone",donorAdapter.donorlist.get(position).phone);
-        startActivity(i);
+            i.putExtra("name",donorAdapter.donorlist.get(position).name);
+            i.putExtra("bgroup",donorAdapter.donorlist.get(position).bgroup);
+
+            i.putExtra("email",donorAdapter.donorlist.get(position).email);
+            i.putExtra("gender",donorAdapter.donorlist.get(position).gender);
+            i.putExtra("imgloc",donorAdapter.donorlist.get(position).imgloc);
+            i.putExtra("address",donorAdapter.donorlist.get(position).address);
+            i.putExtra("phone",donorAdapter.donorlist.get(position).phone);
+            i.putExtra("id",donorAdapter.donorlist.get(position).id);
+            startActivity(i);
+
+
     }
+
+
      boolean checkPermissions() {
          return ActivityCompat.checkSelfPermission(Objects.requireNonNull(this.getActivity()), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                  ActivityCompat.checkSelfPermission(this.getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
@@ -234,7 +298,9 @@ i.putExtra("name",donorAdapter.donorlist.get(position).name);
         @Override
         public void onLocationResult(LocationResult locationResult) {
             Location mLastLocation = locationResult.getLastLocation();
-//            lat
+            latitude=mLastLocation.getLatitude();
+            longitude=mLastLocation.getLongitude();
+//
 
         }
     };

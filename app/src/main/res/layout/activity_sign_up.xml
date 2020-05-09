@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgrdpink"
     tools:context="com.example.bloodbank.SignUp"
     android:orientation="vertical">
 
@@ -25,26 +24,59 @@
     </RelativeLayout>
 
 
-    <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:scaleType="fitXY"
-        android:src="@mipmap/profile"
+<!--    <ImageView-->
+<!--        android:layout_width="100dp"-->
+<!--        android:layout_height="100dp"-->
+<!--        android:layout_gravity="center"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        android:scaleType="fitXY"-->
+<!--        android:src="@mipmap/profile"-->
 
-        android:id="@+id/profile_pic"
-        android:contentDescription="TODO" />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="upload dp"
-        android:id="@+id/uploadb"
+<!--        android:id="@+id/profile_pic"-->
+<!--        android:contentDescription="TODO" />-->
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="center_horizontal"-->
+<!--        android:text="upload dp"-->
+<!--        android:id="@+id/uploadb"-->
 
-        android:background="@drawable/shapelogin_red"
-        android:textColor="@color/White"
+<!--        android:background="@drawable/shapelogin_red"-->
+<!--        android:textColor="@color/White"-->
+<!--        />-->
+    <RelativeLayout android:layout_width="100dp" android:layout_height="100dp"
+
+                    android:layout_gravity="center_horizontal"
+    >
+
+        <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+
+
+                android:src="@mipmap/profile"
+
+                android:id="@+id/profile_pic"
+                android:contentDescription="TODO"
+                android:layout_alignParentTop="true"/>
+        <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/round_button"
+
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/ic_edit_black_24dp"
+                android:id="@+id/uploadb"
+
+
+                android:textColor="@color/White"
         />
+    </RelativeLayout>
+
 
 
     <ScrollView
@@ -130,7 +162,7 @@
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginRight="20dp"
                     android:layout_marginLeft="20dp"
@@ -147,9 +179,16 @@
                         android:layout_marginRight="8dp"/>
                 <EditText
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="110dp"
                         android:textSize="16dp"
                         android:id="@+id/address"
+                        android:maxLines="5"
+                        android:minLines="2"
+                        android:lines="3"
+                        android:scrollbars="vertical"
+                        android:fadeScrollbars="true"
+                        android:gravity="top|left"
+                        android:inputType="textMultiLine"
                         android:layout_weight="1.8"/>
             </LinearLayout>
             <LinearLayout

@@ -1,12 +1,15 @@
 package com.example.bloodbank;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,17 +19,19 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 
 import static com.example.bloodbank.MainActivity.mAuth;
-import static com.example.bloodbank.MainActivity.sp;
+
 
 public class LoginActivity extends AppCompatActivity {
 EditText email,pass;
 
 
-
+ProgressDialog progressDialog;
     TextView feedback;
 Button signup,login;
 FirebaseUser user;
-//Intent i=getIntent();
+    private boolean doubleBackToExitPressedOnce =false;
+
+    //Intent i=getIntent();
 //    private FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,25 +54,34 @@ FirebaseUser user;
              @Override
              public void onClick(View v) {
                  try {
+                     progressDialog = new ProgressDialog(LoginActivity.this);
+                     progressDialog.setTitle("Logging in...");
+                     progressDialog.show();
                      mAuth.signInWithEmailAndPassword(email.getText().toString(), pass.getText().toString())
                              .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                                  @Override
                                  public void onComplete(@NonNull Task<AuthResult> task) {
                                      if (task.isSuccessful()) {
-                                         ;
-                                         sp.edit().putBoolean("logged", true).apply();
 
-                                         startActivity(new Intent(LoginActivity.this, HomePageActivity.class));
+
+
+                                                         progressDialog.dismiss();
+                                                         startActivity(new Intent(LoginActivity.this, HomePageActivity.class));
+
+
+
+
 
                                      } else {
                                          feedback.setText("invalid user");
-
+                                            progressDialog.dismiss();
                                      }
 
                                  }
                              });
 
                  } catch (Exception e) {
+                     progressDialog.dismiss();
                      DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                          @Override
                          public void onClick(DialogInterface dialog, int which) {
@@ -104,8 +118,27 @@ FirebaseUser user;
         pass.setText("");
     }
     @Override
+
     public void onBackPressed() {
-        finish();
+        if (doubleBackToExitPressedOnce) {
+//            super.onBackPressed();
+
+            finish();
+
+        }
+        if(!this.doubleBackToExitPressedOnce)
+            Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+        this.doubleBackToExitPressedOnce = true;
+
+
+        new Handler().postDelayed(new Runnable() {
+
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
     }
     public void signup(View view) {
         startActivity(new Intent(this,SignUp.class));

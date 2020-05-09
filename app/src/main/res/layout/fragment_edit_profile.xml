@@ -4,7 +4,7 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="@color/backgrdpink"
+
 
 
 
@@ -12,7 +12,8 @@
 
     <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="65dp">
+            android:layout_height="65dp"
+    android:layout_gravity="">
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
@@ -25,29 +26,39 @@
                 android:layout_centerVertical="true"
                 android:layout_centerInParent="true"/>
     </RelativeLayout>
+<RelativeLayout android:layout_width="100dp" android:layout_height="100dp"
 
+android:layout_gravity="center_horizontal"
+>
 
     <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="0dp"
             android:scaleType="fitXY"
             android:src="@mipmap/profile"
-android:onClick="chooseImageupdate"
+
+
             android:id="@+id/profile_pic_update"
-            android:contentDescription="TODO" />
-    <Button
+            android:contentDescription="TODO"
+            android:layout_alignParentTop="true"/>
+    <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="chooseImageupdate"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+android:background="@drawable/round_button"
+
             android:layout_gravity="center_horizontal"
-            android:text="Change Profile picture"
+            android:src="@drawable/ic_edit_black_24dp"
             android:id="@+id/uploadb_update"
 
-            android:background="@drawable/shapelogin_red"
+
             android:textColor="@color/White"
     />
-
+</RelativeLayout>
 
     <ScrollView
             android:layout_width="match_parent"
@@ -132,7 +143,7 @@ android:onClick="chooseImageupdate"
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginRight="20dp"
                     android:layout_marginLeft="20dp"
@@ -151,6 +162,13 @@ android:onClick="chooseImageupdate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="16dp"
+                        android:maxLines="5"
+                        android:minLines="2"
+                        android:lines="3"
+                        android:scrollbars="vertical"
+                        android:fadeScrollbars="true"
+                        android:gravity="top|left"
+                        android:inputType="textMultiLine"
                         android:id="@+id/address_update"
                         android:layout_weight="1.8"/>
             </LinearLayout>
@@ -188,7 +206,7 @@ android:onClick="chooseImageupdate"
                     android:layout_marginRight="15dp"
                     android:layout_marginLeft="15dp"
                     android:text="Update"
-                    android:onClick="updateUserInfo"
+                    android:onClick="uploadImage"
                     android:textColor="#fff"
                     android:id="@+id/update"
 

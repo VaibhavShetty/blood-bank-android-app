@@ -9,15 +9,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
 import com.squareup.picasso.Picasso;
-
-import androidx.core.app.ActivityCompat;
 
 import static com.example.bloodbank.MainActivity.db;
 import static com.example.bloodbank.MainActivity.mAuth;
@@ -26,12 +26,17 @@ public class ViewProfile extends Activity {
     //    String id="sds";
     TextView name, email, address, phone, bgroup, gender;
     ImageView profile_pic;
+    DatabaseReference bloodreqRef;
+    DatabaseReference notificatioRef;
+    Bundle i;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile);
-        Bundle i = getIntent().getExtras();
+        i= getIntent().getExtras();
+        bloodreqRef= FirebaseDatabase.getInstance().getReference().child("Blood Requests");
+        notificatioRef=FirebaseDatabase.getInstance().getReference().child("Notifications");
 ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CALL_PHONE},1);
         name = findViewById(R.id.name_user);
         email = findViewById(R.id.email_user);
@@ -46,12 +51,16 @@ ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CALL_PHO
         name.setText(i.getString("name"));
         email.setText(i.getString("email"));
         address.setText(i.getString("address"));
-        phone.setText("8694502643");
+        phone.setText(i.getString("phone"));
 
         bgroup.setText(i.getString("bgroup"));
         gender.setText(i.getString("gender"));
 //                           profile_pic.set
+        if(i.getString("imgloc")!=null)
         Picasso.get().load(i.getString("imgloc")).into(profile_pic);
+        else{
+           profile_pic.setImageResource(R.mipmap.profile);
+        }
 
 
     }
@@ -99,6 +108,8 @@ ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CALL_PHO
 
 
     }
+
+
 
 
 //    public static Bitmap getBitmapFromURL(String src) {

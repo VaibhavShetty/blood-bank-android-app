@@ -8,10 +8,21 @@ public class ZMyDatabaseDataStructure implements Parcelable {
     String address;
     String name;
     String bgroup;
+    String id;
     String imgloc;
+    String unit;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     String phone;
 
-    String  distance;
+    double  distance;
     String gender;
 
     public String getPhone() {
@@ -19,7 +30,7 @@ public class ZMyDatabaseDataStructure implements Parcelable {
     }
 
 
-    public String getDistance() {
+    public double getDistance() {
         return distance;
     }
 
@@ -30,7 +41,7 @@ public class ZMyDatabaseDataStructure implements Parcelable {
     }
 
 
-    public void setDistance(String distance) {
+    public void setDistance(double distance) {
         this.distance = distance;
     }
 
@@ -39,6 +50,8 @@ public class ZMyDatabaseDataStructure implements Parcelable {
         bgroup = in.readString();
         imgloc = in.readString();
         gender = in.readString();
+
+
 
     }
     public ZMyDatabaseDataStructure(){}
@@ -138,5 +151,6 @@ public class ZMyDatabaseDataStructure implements Parcelable {
         parcel.writeString(bgroup);
         parcel.writeString(imgloc);
         parcel.writeString(gender);
+
     }
 }

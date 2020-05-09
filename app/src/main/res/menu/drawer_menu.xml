@@ -5,14 +5,13 @@
         android:id="@+id/nearbydon"
         android:icon="@drawable/ic_people_nearby_24dp"
         android:title="Near By Donors" />
-    <item
-        android:id="@+id/requestdon"
-        android:icon="@drawable/ic_invert_colors_black_24dp"
-        android:title="Request blood" />
+
     <item
         android:id="@+id/edit_profile"
-        android:title="Edit Profile"/>
+        android:title="Edit Profile"
+    android:icon="@drawable/ic_edit_black_24dp"/>
     <item
         android:id="@+id/logout"
-        android:title="Log Out" />
+        android:title="Log Out"
+    android:icon="@drawable/ic_power_settings_new_black_24dp"/>
 </menu>

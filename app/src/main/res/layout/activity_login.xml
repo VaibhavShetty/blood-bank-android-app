@@ -25,9 +25,8 @@
 
         android:drawablePadding="10dp"
         android:hint="Email"
-        android:textColor="#fff"
-        android:textColorHint="#fff"
-        android:textColorHighlight="#fff"/>
+
+        />
 
     <EditText
         android:layout_width="match_parent"
@@ -38,9 +37,7 @@
         android:drawablePadding="10dp"
         android:hint="Password"
         android:inputType="textPassword"
-        android:textColor="#fff"
-        android:textColorHint="#fff"
-        android:textColorHighlight="#fff"/>
+       />
 
 
 
@@ -65,7 +62,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="not a member ?Sign Up"
+        android:text="not a member? Sign Up"
         android:shadowColor="@android:color/transparent"
         android:padding="15dp"
         android:background="@drawable/shapelogin_red"
@@ -83,6 +80,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center_horizontal"
         />
 
 

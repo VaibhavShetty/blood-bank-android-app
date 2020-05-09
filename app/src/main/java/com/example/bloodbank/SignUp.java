@@ -1,18 +1,26 @@
 package com.example.bloodbank;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import com.google.android.gms.location.*;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -20,6 +28,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -40,19 +49,23 @@ import java.util.Map;
 import static com.example.bloodbank.MainActivity.db;
 
 public class SignUp extends AppCompatActivity {
+    private static final int PERMISSION_ID = 15;
     ImageView propic;
     Button submit;
     Uri filePath;
+    GeoPoint g;
 //    ProgressDialog progressDialog;
 //    UploadTask uploadTask;
     String urlStorage;
+    FusedLocationProviderClient mFusedLocationClient;
     FirebaseStorage storage;
     StorageReference storageReference;
     ArrayAdapter<String> adapter1, adapter2;
     Spinner spinnerbtype, spinnergender;
     String id;
     EditText email, password, name, address ,phone;
-//    private int GALLERY = 1, CAMERA = 2;
+    ProgressDialog progressDialog;
+    //    private int GALLERY = 1, CAMERA = 2;
     private FirebaseAuth mAuth;
 
     private static final String IMAGE_DIRECTORY = "/demonuts";
@@ -65,6 +78,8 @@ public class SignUp extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
+        mFusedLocationClient=LocationServices.getFusedLocationProviderClient(this);
+        getLastLocation();
         requestMultiplePermissions();
 
         spinnerbtype = findViewById(R.id.spinnerbtype);
@@ -77,7 +92,7 @@ public class SignUp extends AppCompatActivity {
         adapter2 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, gender);
         spinnergender.setAdapter(adapter2);
 
-        Button upload = findViewById(R.id.uploadb);
+        ImageButton upload = findViewById(R.id.uploadb);
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,45 +113,45 @@ public class SignUp extends AppCompatActivity {
 
                    final String Email = email.getText().toString(),
                             Password = password.getText().toString();
+                   progressDialog = new ProgressDialog(SignUp.this);
+                    progressDialog.setTitle("Signing in...");
+                    progressDialog.show();
 
                     mAuth.createUserWithEmailAndPassword(Email, Password)
                             .addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()) {
-                                        // Sign in: success
-                                        // update UI for current User
                                       FirebaseUser user = mAuth.getCurrentUser();
                                         mAuth.signInWithEmailAndPassword(Email,Password)
                                                 .addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<AuthResult> task) {
                                                         if (task.isSuccessful()) {
-                                                            // Sign in: success
-                                                            // update UI for current User
+
                                                             FirebaseUser user = mAuth.getCurrentUser();
-                                                            updateUI(user,Email);
-                                                        } else {
-                                                            // Sign in: fail
-//                                                            feedback.setText("invalid user");
-//                                                            updateUI(null);
+                                                            uploadImage(user,Email);
                                                         }
 
-                                                        // ...
+
                                                     }
                                                 });
-//                                        assert user != null;
-//                                        id= user.getUid();
-//                                        updateUI(user,Email);
+//
                                     } else {
-                                        // Sign in: fail
+                                     
                                         Log.e("failed", "create Account: Fail!", task.getException());
-//                                        updateUI(null,null);
+//
                                     }
 
                                     // ...
                                 }
-                            });
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            Toast.makeText(getApplicationContext(),"Something is wrong",-1).show();
+                        }
+                    });
 
         }catch (Exception e){}}});
 
@@ -164,7 +179,7 @@ public class SignUp extends AppCompatActivity {
 //                propic.setImageURI(filePath);
             filePath = data.getData();
 
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
                 InputStream inputStream =this.getContentResolver().openInputStream(data.getData());
                Bitmap bmp = BitmapFactory.decodeStream(inputStream);
 
@@ -213,27 +228,42 @@ public class SignUp extends AppCompatActivity {
                     .onSameThread()
                     .check();
         }
-    private void uploadImage(FirebaseUser user) {
+    private void uploadImage(FirebaseUser user,String Email) {
 
         if(filePath != null)
         {
-            final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("Uploading...");
-            progressDialog.show();
+
 
             StorageReference ref = storageReference.child("users/"+ user.getUid());
             ref.putFile(filePath)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-                            while (!uriTask.isComplete());
-                            Uri uriphoto = uriTask.getResult();
-                            urlStorage = uriphoto.toString();
+                            ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                  try {
+                                      urlStorage=uri.toString();
+                                  }catch (NullPointerException e){
+                                      e.printStackTrace();
+                                  }
+
+                                }
+                            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+
+                                    updateUI(user,Email);
+                                }
+                            });
+//                            Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+//                            while (!uriTask.isComplete());
+//                            Uri uriphoto = uriTask.getResult();
+//                            urlStorage = uriphoto.toString();
 
 
-                            progressDialog.dismiss();
-                            Toast.makeText(SignUp.this, "Uploaded", Toast.LENGTH_SHORT).show();
+//                            progressDialog.dismiss();
+//                            Toast.makeText(SignUp.this, "Uploaded", Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -248,13 +278,14 @@ public class SignUp extends AppCompatActivity {
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                             double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
                                     .getTotalByteCount());
-                            progressDialog.setMessage("Uploaded "+(int)progress+"%");
+                            progressDialog.setMessage("Signing in..."+(int)progress+"%");
                         }
                     });
+
         }
     }
         private void updateUI (FirebaseUser currentUser,String Email)  {
-            try{uploadImage(currentUser);}catch(Exception e){Log.d("userid  ","isnull");}
+//            try{uploadImage(currentUser);}catch(Exception e){Log.d("userid  ","isnull");}
 //        try{Log.d("userid  ",currentUser.getUid());}catch(Exception e){Log.d("userid  ","isnull");}
 
             name = findViewById(R.id.name);
@@ -281,11 +312,13 @@ public class SignUp extends AppCompatActivity {
 //
 //                        }
 //                    });
+            data.put("location",g);
             data.put("imgloc",urlStorage );
             db.collection("users").document(currentUser.getUid()).set(data)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
+                            progressDialog.dismiss();
                             Intent i =new Intent(SignUp.this,HomePageActivity.class);
 //                            i.putExtra("userid",currentUser);
 
@@ -300,7 +333,90 @@ public class SignUp extends AppCompatActivity {
             });
 
             }
+    private boolean checkPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        return false;
+    }
+
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                PERMISSION_ID
+        );
+    }
+
+    private boolean isLocationEnabled() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+                LocationManager.NETWORK_PROVIDER
+        );
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_ID) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Granted. Start getting the location information
+            }
+        }
+    }
+    @SuppressLint("MissingPermission")
+    private void getLastLocation(){
+        if (checkPermissions()) {
+            if (isLocationEnabled()) {
+                mFusedLocationClient.getLastLocation().addOnCompleteListener(
+                        new OnCompleteListener<Location>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Location> task) {
+                                Location location = task.getResult();
+                                if (location == null) {
+                                    requestNewLocationData();
+                                } else {
+                                    g =new GeoPoint(location.getLatitude(),location.getLongitude());
+                                }
+                            }
+                        }
+                );
+            } else {
+                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        } else {
+            requestPermissions();
+        }
+    }
+    @SuppressLint("MissingPermission")
+    private void requestNewLocationData(){
+
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(0);
+        mLocationRequest.setFastestInterval(0);
+        mLocationRequest.setNumUpdates(1);
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationClient.requestLocationUpdates(
+                mLocationRequest, mLocationCallback,
+                Looper.myLooper()
+        );
+
+    }
+    private LocationCallback mLocationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            Location mlocation = locationResult.getLastLocation();
+            g =new GeoPoint(mlocation.getLatitude(),mlocation.getLongitude());
+
+        }
+    };
 }
+
 
 
 

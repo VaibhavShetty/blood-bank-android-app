@@ -15,16 +15,19 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.squareup.picasso.Picasso;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.example.bloodbank.MainActivity.db;
 import static com.example.bloodbank.MainActivity.mAuth;
 
 public class EditProfile extends Fragment {
     View view;
-    String id = mAuth.getCurrentUser().getUid();
+    ZMyDatabaseDataStructure z ;
+    String id = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
 
 
     @Nullable
@@ -35,7 +38,8 @@ public class EditProfile extends Fragment {
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        ZMyDatabaseDataStructure z = documentSnapshot.toObject(ZMyDatabaseDataStructure.class);
+                         z = documentSnapshot.toObject(ZMyDatabaseDataStructure.class);
+                        assert z != null;
                         updateFields(view, z);
                     }
                 })
@@ -48,21 +52,23 @@ public class EditProfile extends Fragment {
         return view;
     }
 
-    public void updateFields(View view, ZMyDatabaseDataStructure donor) {
+    public void updateFields(View view, @NotNull ZMyDatabaseDataStructure donor) {
         EditText name, address, phone;
-        Spinner bdg, gen;
+        Spinner bdg, genspinner;
         Picasso.get().load(donor.getPhoto()).into((ImageView) view.findViewById(R.id.profile_pic_update));
         bdg = view.findViewById(R.id.spinnerbtype_update);
-        gen = view.findViewById(R.id.spinner_gender_update);
+        genspinner = view.findViewById(R.id.spinner_gender_update);
         name = view.findViewById(R.id.name_update);
         address = view.findViewById(R.id.address_update);
         phone = view.findViewById(R.id.phone_update);
         name.setText(donor.getName());
+        String bgroup=donor.getBgroup();
+        String gen= donor.getGender();
         address.setText(donor.getAddress());
         phone.setText(donor.getPhone());
         String[] group = new String[]{"O+", "O-", "A+", "B+", "A-", "B-", "AB+", "AB-"};
         ArrayAdapter<String> adapter1;
-        adapter1 = new ArrayAdapter<>(getActivity(),
+        adapter1 = new ArrayAdapter<>(Objects.requireNonNull(getActivity()),
                 android.R.layout.simple_spinner_dropdown_item,
                 group);
         bdg.setAdapter(adapter1);
@@ -72,23 +78,23 @@ public class EditProfile extends Fragment {
             bdgmap.put(s, i);
             i++;
         }
-        i = bdgmap.get(donor.bgroup);
 
 
-        bdg.setSelection(i);
+
+        bdg.setSelection(bdgmap.get(bgroup));
 
         String[] gender = new String[]{"male", "female", "other"};
         Map<String, Integer> genmap = new HashMap<>();
         i = 0;
-        for (String s : group) {
-            bdgmap.put(s, i);
+        for (String s : gender) {
+            genmap.put(s, i);
             i++;
         }
         ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, gender);
-        gen.setAdapter(adapter2);
-        i = genmap.get(donor.gender);
+        genspinner.setAdapter(adapter2);
+        i = genmap.get(gen);
 
-        gen.setSelection(i);
+        genspinner.setSelection(i);
 
 
     }

@@ -4,10 +4,10 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,13 +23,13 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.karumi.dexter.Dexter;
@@ -41,6 +41,7 @@ import com.karumi.dexter.listener.PermissionRequestErrorListener;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,15 +51,16 @@ import static com.example.bloodbank.MainActivity.mAuth;
 
 public class HomePageActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 DrawerLayout drawerLayout;
+    ProgressDialog progressDialog;
     ImageView propic_up;
     Uri filePath;
 
 
-
     String urlStorage;
-    FirebaseStorage storage;
+
     StorageReference storageReference;
     FirebaseUser currentUser=mAuth.getCurrentUser();
+
 NavigationView navigationView;
 ActionBarDrawerToggle actionBarDrawerToggle;
 
@@ -73,6 +75,8 @@ boolean doubleBackToExitPressedOnce = false;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
+
+
         navigationView =findViewById(R.id.navigationview);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -100,15 +104,17 @@ boolean doubleBackToExitPressedOnce = false;
 
             fragmentTransaction.replace(R.id.container_fragment,new MainFragment());
             fragmentTransaction.commit();
-        }else if(item.getItemId()==R.id.requestdon) {
-            fragmentTransaction.replace(R.id.container_fragment, new Request_fragment());
-            fragmentTransaction.commit();
+//        }else if(item.getItemId()==R.id.requestdon) {
+//            fragmentTransaction.replace(R.id.container_fragment, new Request_fragment());
+//            fragmentTransaction.commit();
         }else if(item.getItemId()==R.id.edit_profile){
             fragmentTransaction.replace(R.id.container_fragment, new EditProfile());
             fragmentTransaction.commit();
         }else if(item.getItemId()==R.id.logout){
             FirebaseAuth.getInstance().signOut();
+
             startActivity(new Intent(this,LoginActivity.class));
+
         }
         drawerLayout.closeDrawer(GravityCompat.START,true);
         return true;
@@ -121,9 +127,10 @@ boolean doubleBackToExitPressedOnce = false;
             finish();
 
         }
-
+if(!this.doubleBackToExitPressedOnce)
+    Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
         this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
 
         new Handler().postDelayed(new Runnable() {
 
@@ -143,9 +150,11 @@ boolean doubleBackToExitPressedOnce = false;
         {
             filePath = data.getData();
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                InputStream inputStream =this.getContentResolver().openInputStream(data.getData());
+                Bitmap bmp = BitmapFactory.decodeStream(inputStream);
                 propic_up=findViewById(R.id.profile_pic_update);
-                propic_up.setImageBitmap(bitmap);
+                propic_up.setImageBitmap(bmp);
             }
             catch (IOException e)
             {
@@ -153,21 +162,37 @@ boolean doubleBackToExitPressedOnce = false;
             }
         }
     }
-    private void uploadImage(FirebaseUser user) {
-
+    public void uploadImage(View view) {
+        progressDialog = new ProgressDialog(HomePageActivity.this);
+        progressDialog.setTitle("Updating...");
+        progressDialog.show();
         if(filePath != null)
         {
-            final ProgressDialog progressDialog = new ProgressDialog(HomePageActivity.this);
-            progressDialog.setTitle("Uploading...");
-            progressDialog.show();
 
-            StorageReference ref = storageReference.child("users/"+ user.getUid());
+
+            StorageReference ref = storageReference.child("users/"+ currentUser.getUid());
             ref.putFile(filePath)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            progressDialog.dismiss();
-                            Toast.makeText(HomePageActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+
+                            ref.getDownloadUrl()
+                                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Log.d("storage","stroed");
+                                            urlStorage=uri.toString();
+                                            progressDialog.dismiss();
+
+                                        }
+                                    })
+                                    .addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Uri> task) {
+                                            updateUserInfo(view);
+                                        }
+                                    });
+
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -176,21 +201,14 @@ boolean doubleBackToExitPressedOnce = false;
                             progressDialog.dismiss();
                             Toast.makeText(HomePageActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                    })
-                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                                    .getTotalByteCount());
-                            progressDialog.setMessage("Uploaded "+(int)progress+"%");
-                        }
                     });
+
         }
     }
     public void updateUserInfo(View view) {
 
-        try{uploadImage(currentUser);}catch(Exception e){
-            Log.d("userid  ","isnull");}
+        progressDialog.dismiss();
+
 //        try{Log.d("userid  ",currentUser.getUid());}catch(Exception e){Log.d("userid  ","isnull");}
         EditText name,address,phone;
         Spinner spinnerbtype,spinnergender;
@@ -206,7 +224,6 @@ boolean doubleBackToExitPressedOnce = false;
                 Phone=phone.getText().toString();
 
         Map<String, Object> data = new HashMap<>();
-
 //                    data.put("dp", propic);
         data.put("name", Name);
         data.put("address", Address);
@@ -215,25 +232,23 @@ boolean doubleBackToExitPressedOnce = false;
 
 
         data.put("phone",Phone);
-        storageReference.child("users/" + currentUser.getUid()).getDownloadUrl()
-                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        urlStorage= uri.toString();
 
-                    }
-                });
-        data.put("imgloc",urlStorage );
+    data.put("imgloc",urlStorage );
+
+
         db.collection("users").document(currentUser.getUid()).update(data)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+                        progressDialog.dismiss();
                         Toast.makeText(getApplicationContext(),"updated successfully",Toast.LENGTH_LONG).show();
+                        fragmentTransaction.replace(R.id.container_fragment, new EditProfile());
+                        fragmentTransaction.commit();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-
+                                    progressDialog.dismiss();
             }
         });
 
@@ -284,5 +299,9 @@ boolean doubleBackToExitPressedOnce = false;
         i.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(i, "update picture"), 89);
     }
+
+
+
+
 
 }

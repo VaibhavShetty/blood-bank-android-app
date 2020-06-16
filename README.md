@@ -1,0 +1,3 @@
+# blood-bank-android-app
+
+<img src="/screenshots/splashscreen.png" alt="Splash Screen" width="150" height="300" />     <img src="/screenshots/sign-up.png" alt="sign up" width="150" height="300" />    <img src="/screenshots/login.png" alt="Login" width="150" height="300" />    <img src="/screenshots/nearbydonors.png" alt="Nearby Donors" width="150" height="300" />    <img src="/screenshots/editprofile.png" alt="Edit profile" width="150" height="300" />    <img src="/screenshots/navigationdrawer.png" alt="Navigation Drawer" width="150" height="300" />    <img src="/screenshots/viewprofile.png" alt="View Profile" width="150" height="300" /> 

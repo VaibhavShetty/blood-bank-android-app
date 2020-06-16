@@ -10,13 +10,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.Objects;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import static com.example.bloodbank.MainActivity.mAuth;
 
@@ -73,8 +77,15 @@ FirebaseUser user;
 
 
                                      } else {
-                                         feedback.setText("invalid user");
-                                            progressDialog.dismiss();
+                                         progressDialog.dismiss();
+                                         AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(LoginActivity.this));
+
+                                         builder.setMessage("Wrong email or password")
+                                                 .setTitle("please try again");
+
+                                         AlertDialog dialog = builder.create();
+                                         dialog.show();
+
                                      }
 
                                  }
@@ -143,6 +154,7 @@ FirebaseUser user;
     public void signup(View view) {
         startActivity(new Intent(this,SignUp.class));
     }
+
 }
 
 

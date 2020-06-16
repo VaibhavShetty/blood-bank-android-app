@@ -5,12 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+
 import com.squareup.picasso.Picasso;
-import de.hdodenhof.circleimageview.CircleImageView;
 
 import java.util.ArrayList;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class DonorAdapter extends RecyclerView.Adapter<DonorAdapter.DonorHolder> {
 
@@ -40,7 +42,7 @@ public class DonorAdapter extends RecyclerView.Adapter<DonorAdapter.DonorHolder>
         holder.name.setText(donor.getName());
         holder.bgroup.setText(donor.getBgroup());
         holder.distance.setText(donor.distance+donor.unit);
-        if(holder.img!=null)
+        if(donor.getPhoto()!=null)
         Picasso.get().load(donor.getPhoto()).into(holder.img);
         else {
 

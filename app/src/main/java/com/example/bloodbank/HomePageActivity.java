@@ -11,18 +11,12 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -30,6 +24,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.karumi.dexter.Dexter;
@@ -45,6 +40,16 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import static com.example.bloodbank.MainActivity.db;
 import static com.example.bloodbank.MainActivity.mAuth;
@@ -57,7 +62,7 @@ DrawerLayout drawerLayout;
 
 
     String urlStorage;
-
+FirebaseStorage storage;
     StorageReference storageReference;
     FirebaseUser currentUser=mAuth.getCurrentUser();
 
@@ -75,7 +80,8 @@ boolean doubleBackToExitPressedOnce = false;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
-
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
 
         navigationView =findViewById(R.id.navigationview);
         navigationView.setNavigationItemSelectedListener(this);
@@ -115,6 +121,7 @@ boolean doubleBackToExitPressedOnce = false;
 
             startActivity(new Intent(this,LoginActivity.class));
 
+
         }
         drawerLayout.closeDrawer(GravityCompat.START,true);
         return true;
@@ -124,7 +131,7 @@ boolean doubleBackToExitPressedOnce = false;
         if (doubleBackToExitPressedOnce) {
 //            super.onBackPressed();
 
-            finish();
+            finishAndRemoveTask();
 
         }
 if(!this.doubleBackToExitPressedOnce)
@@ -163,60 +170,97 @@ if(!this.doubleBackToExitPressedOnce)
         }
     }
     public void uploadImage(View view) {
+//        EditText name,address,phone;
+//
+//        Spinner spinnerbtype,spinnergender;
+//        name =view. findViewById(R.id.name_update);
+//        address = findViewById(R.id.address_update);
+//
+//        phone=findViewById(R.id.phone_update);
+//        spinnerbtype=findViewById(R.id.spinnerbtype_update);
+//        spinnergender=findViewById(R.id.spinner_gender_update);
+//        String nmm=name.getText().toString();
+//        if(nmm==null||phone.getText().toString()==null||address.getText().toString()==null||!spinnerbtype.isSelected() || !spinnergender.isSelected()){
+//
+//            AlertDialog.Builder builder = new AlertDialog.Builder(HomePageActivity.this);
+//
+//            builder.setMessage("Please enter required details")
+//                    .setTitle("Error");
+//
+//            AlertDialog dialog = builder.create();
+//            dialog.show();
+//            return;
+//
+//        } else {
+//            phone.getText().toString();
+//        }
         progressDialog = new ProgressDialog(HomePageActivity.this);
         progressDialog.setTitle("Updating...");
         progressDialog.show();
+
         if(filePath != null)
         {
 
 
             StorageReference ref = storageReference.child("users/"+ currentUser.getUid());
-            ref.putFile(filePath)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+            ref.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    ref.putFile(filePath)
+                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                            ref.getDownloadUrl()
-                                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                        @Override
-                                        public void onSuccess(Uri uri) {
-                                            Log.d("storage","stroed");
-                                            urlStorage=uri.toString();
-                                            progressDialog.dismiss();
+                                    ref.getDownloadUrl()
+                                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+                                                    Log.d("storage","stroed");
+                                                    urlStorage=uri.toString();
+//                                                    progressDialog.dismiss();
 
-                                        }
-                                    })
-                                    .addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Uri> task) {
-                                            updateUserInfo(view);
-                                        }
-                                    });
+                                                }
+                                            })
+                                            .addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Uri> task) {
+                                                    updateUserInfo(view);
+                                                }
+                                            });
 
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            progressDialog.dismiss();
-                            Toast.makeText(HomePageActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+//                                    progressDialog.dismiss();
+                                    Toast.makeText(HomePageActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
+            });
 
+
+        }
+        else {
+            updateUserInfo(view);
         }
     }
     public void updateUserInfo(View view) {
 
-        progressDialog.dismiss();
+//        progressDialog.dismiss();
 
 //        try{Log.d("userid  ",currentUser.getUid());}catch(Exception e){Log.d("userid  ","isnull");}
         EditText name,address,phone;
+        CheckBox donorcheck;
         Spinner spinnerbtype,spinnergender;
-        name = view.findViewById(R.id.name_update);
-        address = view.findViewById(R.id.address_update);
-        phone=view.findViewById(R.id.phone_update);
-        spinnerbtype=view.findViewById(R.id.spinnerbtype_update);
-        spinnergender=view.findViewById(R.id.spinner_gender_update);
+        name = findViewById(R.id.name_update);
+        address = findViewById(R.id.address_update);
+        donorcheck= findViewById(R.id.donorcheckupdate);
+        phone=findViewById(R.id.phone_update);
+        spinnerbtype=findViewById(R.id.spinnerbtype_update);
+        spinnergender=findViewById(R.id.spinner_gender_update);
+
         String Name = name.getText().toString(),
                 Address = address.getText().toString(),
                 bg = spinnerbtype.getSelectedItem().toString(),
@@ -230,10 +274,11 @@ if(!this.doubleBackToExitPressedOnce)
         data.put("bgroup", bg);
         data.put("gender", gen);
 
-
+        data.put("donor",donorcheck.isChecked());
         data.put("phone",Phone);
-
-    data.put("imgloc",urlStorage );
+if(filePath!=null) {
+    data.put("imgloc", urlStorage);
+}
 
 
         db.collection("users").document(currentUser.getUid()).update(data)
@@ -242,13 +287,13 @@ if(!this.doubleBackToExitPressedOnce)
                     public void onSuccess(Void aVoid) {
                         progressDialog.dismiss();
                         Toast.makeText(getApplicationContext(),"updated successfully",Toast.LENGTH_LONG).show();
-                        fragmentTransaction.replace(R.id.container_fragment, new EditProfile());
-                        fragmentTransaction.commit();
+//                        fragmentTransaction.replace(R.id.container_fragment, new EditProfile());
+//                        fragmentTransaction.commit();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                                    progressDialog.dismiss();
+//                                    progressDialog.dismiss();
             }
         });
 
@@ -267,7 +312,7 @@ if(!this.doubleBackToExitPressedOnce)
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         // check if all permissions are granted
                         if (report.areAllPermissionsGranted()) {
-                            Toast.makeText(getApplicationContext(), "All permissions are granted by user!", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(getApplicationContext(), "All permissions are granted by user!", Toast.LENGTH_SHORT).show();
                         }
 
                         // check for permanent denial of any permission
@@ -293,15 +338,37 @@ if(!this.doubleBackToExitPressedOnce)
     }
 
     public void chooseImageupdate(View view) {
-        requestMultiplePermissions();
-        Intent i = new Intent();
-        i.setType("image/*");
-        i.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(i, "update picture"), 89);
+
+
+        switch (view.getId()) {
+            case R.id.uploadb_update:
+
+                requestMultiplePermissions();
+                Intent i = new Intent();
+                i.setType("image/*");
+                i.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(i, "update picture"), 89);
+                break;
+            case R.id.update:
+                uploadImage(view);
+                break;
+            case R.id.deleteprofile:
+                deleteprofile(view);
+                break;
+
+        }
+
+
     }
 
+    private void deleteprofile(View view) {
 
+        db.collection("users").document(currentUser.getUid()).delete();
 
+        Objects.requireNonNull(mAuth.getCurrentUser()).delete();
+        storageReference.child("users/"+currentUser.getUid()).delete();
+        startActivity(new Intent(this,LoginActivity.class));
+    }
 
 
 }

@@ -9,8 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -18,6 +17,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
 import com.squareup.picasso.Picasso;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 
 import static com.example.bloodbank.MainActivity.db;
 import static com.example.bloodbank.MainActivity.mAuth;
@@ -46,7 +48,7 @@ ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CALL_PHO
         gender = findViewById(R.id.gender_user);
         profile_pic = findViewById(R.id.profile_pic_user);
 
-        name.setText(i.getString("name"));
+       
 
         name.setText(i.getString("name"));
         email.setText(i.getString("email"));

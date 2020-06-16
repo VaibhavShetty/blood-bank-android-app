@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import com.google.android.gms.location.*;
@@ -57,6 +58,7 @@ public class SignUp extends AppCompatActivity {
 //    ProgressDialog progressDialog;
 //    UploadTask uploadTask;
     String urlStorage;
+    CheckBox donorcheck;
     FusedLocationProviderClient mFusedLocationClient;
     FirebaseStorage storage;
     StorageReference storageReference;
@@ -82,6 +84,8 @@ public class SignUp extends AppCompatActivity {
         getLastLocation();
         requestMultiplePermissions();
 
+        donorcheck=findViewById(R.id.donorcheck);
+
         spinnerbtype = findViewById(R.id.spinnerbtype);
         String[] group = new String[]{"O+", "O-", "A+", "B+", "A-", "B-", "AB+", "AB-"};
         adapter1 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, group);
@@ -91,8 +95,13 @@ public class SignUp extends AppCompatActivity {
         String[] gender = new String[]{"male", "female", "other"};
         adapter2 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, gender);
         spinnergender.setAdapter(adapter2);
-
+        name = findViewById(R.id.name);
+        address = findViewById(R.id.address);
+        phone=findViewById(R.id.phone);
         ImageButton upload = findViewById(R.id.uploadb);
+
+
+
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,8 +120,21 @@ public class SignUp extends AppCompatActivity {
 
                     password = findViewById(R.id.password);
 
+
                    final String Email = email.getText().toString(),
                             Password = password.getText().toString();
+                   if((Email == null) || (Password == null) ||( name.getText().toString()==null)||(address.getText().toString()==null)||(phone.getText().toString()==null)){
+
+                           AlertDialog.Builder builder = new AlertDialog.Builder(SignUp.this);
+
+                           builder.setMessage("Please enter required details")
+                                   .setTitle("Error");
+
+                           AlertDialog dialog = builder.create();
+                           dialog.show();
+                            return;
+
+                   }
                    progressDialog = new ProgressDialog(SignUp.this);
                     progressDialog.setTitle("Signing in...");
                     progressDialog.show();
@@ -204,7 +226,7 @@ public class SignUp extends AppCompatActivity {
                         public void onPermissionsChecked(MultiplePermissionsReport report) {
                             // check if all permissions are granted
                             if (report.areAllPermissionsGranted()) {
-                                Toast.makeText(getApplicationContext(), "All permissions are granted by user!", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(getApplicationContext(), "All permissions are granted by user!", Toast.LENGTH_SHORT).show();
                             }
 
                             // check for permanent denial of any permission
@@ -288,9 +310,7 @@ public class SignUp extends AppCompatActivity {
 //            try{uploadImage(currentUser);}catch(Exception e){Log.d("userid  ","isnull");}
 //        try{Log.d("userid  ",currentUser.getUid());}catch(Exception e){Log.d("userid  ","isnull");}
 
-            name = findViewById(R.id.name);
-            address = findViewById(R.id.address);
-            phone=findViewById(R.id.phone);
+
             String Name = name.getText().toString(),
                     Address = address.getText().toString(),
                     bg = spinnerbtype.getSelectedItem().toString(),
@@ -312,6 +332,7 @@ public class SignUp extends AppCompatActivity {
 //
 //                        }
 //                    });
+            data.put("donor", donorcheck.isChecked());
             data.put("location",g);
             data.put("imgloc",urlStorage );
             db.collection("users").document(currentUser.getUid()).set(data)

@@ -198,6 +198,27 @@ android:background="@drawable/round_button"
                         android:layout_weight="1.8"/>
 
             </LinearLayout>
+
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="5dp"
+                        android:weightSum="2">
+                    <CheckBox
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:text="I want to be a donor"
+                            android:id="@+id/donorcheckupdate"
+                            android:textStyle="bold"
+                            android:textSize="16dp"
+                            android:layout_weight=".05"
+                            android:layout_marginRight="8dp"/>
+            </LinearLayout>
             <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -205,14 +226,25 @@ android:background="@drawable/round_button"
                     android:background="@drawable/shapelogin_red"
                     android:layout_marginRight="15dp"
                     android:layout_marginLeft="15dp"
-                    android:text="Update"
-                    android:onClick="uploadImage"
+                    android:text="update"
+                    android:onClick="chooseImageupdate"
                     android:textColor="#fff"
                     android:id="@+id/update"
 
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="10dp"/>
-
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="@drawable/shapelogin_red"
+                android:layout_marginRight="15dp"
+                android:layout_marginLeft="15dp"
+                android:text="delete account"
+                android:onClick="chooseImageupdate"
+                android:textColor="#fff"
+                android:id="@+id/deleteprofile"
+/>
             <TextView android:layout_width="wrap_content" android:layout_height="16dp"
 
                       android:id="@+id/feedback_update"

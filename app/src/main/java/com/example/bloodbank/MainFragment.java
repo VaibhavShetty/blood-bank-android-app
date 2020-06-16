@@ -18,14 +18,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.gms.location.*;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -35,7 +33,19 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Objects;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import static com.example.bloodbank.MainActivity.db;
 import static com.example.bloodbank.MainActivity.mAuth;
@@ -99,7 +109,11 @@ public class MainFragment extends Fragment implements DonorAdapter.onSingleDonor
 
                   Log.d("id", documentSnapshot.getId());
                   Log.d("iduser", id);
-
+                  if(documentSnapshot.contains("donor")) {
+                      if (!documentSnapshot.getBoolean("donor")) {
+                          continue;
+                      }
+                  }
                   double dist= 4d;
                   if (!(id.equals(documentSnapshot.getId()))) {
                     try{ dist = distance(latitude,
@@ -137,12 +151,7 @@ public class MainFragment extends Fragment implements DonorAdapter.onSingleDonor
                       else if(o2.unit.equals("m")&&o1.unit.equals("km"))
                           return  1;
                       else {
-                          if (o1.distance == o2.distance)
-                              return 0;
-                          else if (o1.distance < o2.distance)
-                              return -1;
-                          else
-                              return 1;
+                          return Double.compare(o1.distance, o2.distance);
                       }
                   }
               });
@@ -181,7 +190,7 @@ public class MainFragment extends Fragment implements DonorAdapter.onSingleDonor
                         }
                     }
                     if(donorlist2.isEmpty()){
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
 
                         builder.setMessage("no donors found")
                                 .setTitle("sorry");

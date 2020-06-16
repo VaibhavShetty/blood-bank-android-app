@@ -224,6 +224,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="call"
+        android:textColor="#fff"
         android:onClick="calluser"
 
         android:layout_gravity="center_horizontal"
@@ -234,7 +235,7 @@
                 android:onClick="viewOnMap"
                 android:layout_marginStart="10dp"
                 android:layout_gravity="center_horizontal"
-
+android:textColor="#fff"
                 android:background="@drawable/shapelogin_red"
         />
 
